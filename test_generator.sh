@@ -11,6 +11,26 @@
 #                                                                              #
 # **************************************************************************** #
 
+echo -e "\033[1;34m####################################################################
+# This script was written by\033[1;37m hmelica \033[1;34mto test your projetcs :)      #
+# Happy coding !                                                   #
+#                                                                  #
+# If you like the script, don't forget to star the repo            #
+# on github !                                                      #
+#                                                                  #
+# Do not hesitate to share this repository, but remember using the #
+# github link to enable auto-updates.                              #
+#                                                                  #
+# TIP: to quickly share the script, use the\033[0;37m -p \033[1;34mflag :)             #
+####################################################################\033[0m\n"
+
+majRepo=$(cd $(dirname $(realpath $0)) ; git remote update 2>&1 | grep -o -e "" ; git status -bs | grep -e "#" | grep -o -e ".[0-9]")
+if [[ $majRepo ]]; then
+	echo -e "\033[1;33m WARN \033[0m: New update avaliable ! Run with the flag\033[0;37m -u \033[0mto update :)"
+else
+	echo -e "\033[1;32m OK \033[0m: Script is up to date :)\n"
+fi
+
 checkMain=1
 help_init="Use -i to initialize the repo"
 help_run="\n
@@ -113,21 +133,37 @@ do_test() {
 		echo "ERRORS DURING COMPILATION"
 		echo $compilation_logs
 	else
-		exec $test_repo$(echo $1 | sed "s/\.c/.out/g")
+		echo "$(exec $test_repo$(echo $1 | sed "s/\.c/.out/g"))"
 	fi
 }
 
-while getopts "ihrc" opt; do
+clean() {
+	find $test_repo \( -name "MAIN*\.c" -o -name "*\.out" \) -delete
+}
+
+while getopts "ihrcpu" opt; do
 	case $opt in
+		u)
+			upd=$(cd $(dirname $(realpath -P $0)) ; git pull -ff)
+			echo -e "\033[1;32m OK \033[0m: Script is up to date :)"
+			exit
+			;;
+		p)
+			echo -e "\033[1;32m OK \033[0m: repo link copied to clipboard :)"
+			echo -n "https://github.com/etyloppihacilem/test_generator.git" | xclip -sel clip
+			echo -e " Use it with 
+	\033[36mgit clone https://github.com/etyloppihacilem/test_generator.git\033[0m"
+			exit
+			;;
 		h)
-			if [ -d "./test_gen/" ]; then
+			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
 				echo -e $help_run
 			else
 				echo -e $help_init
 			fi
 			;;
 		i)
-			if [ -d "./test_gen/" ]; then
+			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
 				echo "Repo already initialized, see -h"
 			else
 				mkdir test_gen
@@ -142,11 +178,11 @@ while getopts "ihrc" opt; do
 				if [ $file = "-c" ]; then
 					continue
 				fi
-				if [ $(echo $file | grep "\.c") ] && [ -f $file ]; then
+				if [ $(echo $file | grep "\.c") ] && [ -f $repo$(get_file_name $file) ]; then
 					gen_template $file
-					echo Template generated for $file
+					echo -e "Template generated for \033[1;33m$(get_file_name $file)\033[0m"
 				else
-					echo -e "Wrong input :/\t\t$file"
+					echo -e "\033[1;31mWrong input\033[0m :/\t\t\033[1;33m$(get_file_name $file)\033[0m"
 				fi
 			done
 			;;
@@ -166,14 +202,14 @@ while getopts "ihrc" opt; do
 					if [ $(echo $(get_test_name $file) | grep "\.c") ] && [ -f $test_repo$(get_test_name $file) ]; then
 						to_test=$test_repo$(get_test_name $file)
 					else
-						echo -e "No testfile found :(\t\t$file"
+						echo -e "\033[1;31mNo testfile found\033[0m :(\t\t\033[1;33m$(get_file_name $file)\033[0m"
 						continue
 					fi
 				fi
 				echo -e "Processing tests for \033[1;33m$(get_file_name $file)\033[0m"
 				do_test $to_test
+				clean
 			done
-
 			;;
 	esac
 done
