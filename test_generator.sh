@@ -37,25 +37,26 @@ help_run="\n
 \n
 >> Write your tests into ./test_gen/ and run with -r\n
 \n
---------------------------------------------------------------------------------\n
+--------------------------------------------------------------------\n
 ### TESTFILES :\n
---------------------------------------------------------------------------------\n
+--------------------------------------------------------------------\n
 Tests files should be named \"TESTER_{realname}.c\"\n\n
 You can create one from a template using the -c [filename] command.\n\n
-If your tests requires depencies in other files, you need to add a comment like:\n\n
+If your tests requires depencies in other files, you need to add a\n
+comment like:\n\n
 \t//DEPENDENCIES: file.c file1.c file2.c\n\n
 The comment can be anywhere in the testfile.\n\n
---------------------------------------------------------------------------------\n
+--------------------------------------------------------------------\n
 ### TESTS FUNCTIONS :\n
---------------------------------------------------------------------------------\n
+--------------------------------------------------------------------\n
 Tests functions should have a prototype like this :\n\n
 \tint\tT_{name}(void);\n\n
 There may be several test functions in one single test file.\n\n
 Return value :\n
 --------------\n
 The return value is 1 if the test passes succesfully or 0 if not.\n
-Functions are supposed to be executed in the same order than in the file,\n
-but this is not garanteed.
+Functions are supposed to be executed in the same order than in the\n
+file, but this is not garanteed.
 "
 
 
