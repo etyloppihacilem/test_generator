@@ -24,15 +24,6 @@ echo -e "\033[1;34m#############################################################
 # TIP: to quickly share the script, use the\033[0;37m -p \033[1;34mflag :)             #
 ####################################################################\033[0m\n"
 
-if [ $1 ] && ! [ $1 = "-u" ]; then
-	majRepo=$(cd $(dirname $(realpath $0)) ; git remote update 2>&1 | grep -o -e "" ; git status -bs | grep -e "#" | grep -o -e ".[0-9]")
-	if [[ $majRepo ]]; then
-		echo -e "\033[1;33m WARN \033[0m: New update avaliable ! Run with the flag\033[0;37m -u \033[0mto update :)\n"
-	else
-		echo -e "\033[1;32m OK \033[0m: Script is up to date :)\n"
-	fi
-fi
-
 checkMain=1
 help_init="Use -i to initialize the repo"
 help_run="\n
@@ -172,6 +163,12 @@ while getopts "aihrcpu" opt; do
 			fi
 			;;
 		i)
+			majRepo=$(cd $(dirname $(realpath $0)) ; git remote update 2>&1 | grep -o -e "" ; git status -bs | grep -e "#" | grep -o -e ".[0-9]")
+			if [[ $majRepo ]]; then
+				echo -e "\033[1;33m WARN \033[0m: New update avaliable ! Run with the flag\033[0;37m -u \033[0mto update :)\n"
+			else
+				echo -e "\033[1;32m OK \033[0m: Script is up to date :)\n"
+			fi
 			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
 				if ! [ -f $repo.gitignore ] || ! [ $(cat .gitignore | grep "\./test_gen/\*\*") ]; then
 					echo "./test_gen/**" >> $repo.gitignore
