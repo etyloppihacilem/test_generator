@@ -21,6 +21,8 @@ echo -e "\033[1;34m#############################################################
 # Do not hesitate to share this repository, but remember using the #
 # github link to enable auto-updates.                              #
 #                                                                  #
+# Use the flag -h to display help                                  #
+#                                                                  #
 # TIP: to quickly share the script, use the\033[0;37m -p \033[1;34mflag :)             #
 ####################################################################\033[0m\n"
 
