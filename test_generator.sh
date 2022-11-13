@@ -11,6 +11,116 @@
 #                                                                              #
 # **************************************************************************** #
 
+if [ $(basename $(realpath .)) = "test_gen" ]; then
+	repo="../"
+else
+	repo="./"
+fi
+
+test_repo=$repo"test_gen/"
+
+clean() {
+	find $test_repo \( -name "TEMP_*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
+}
+
+server_help(){
+	echo "
+Use the server command to connect to other packs of testfiles
+
+server [command] [args]
+
+-----------------------
+## server push \"commit string\"
+Pushes updates under commit
+Prompt for commit if no commit string provided
+
+-----------------------
+## server pull
+Pull from the repo, or if it doen't exist,
+add the test repo <link> to your actual repo
+If no link provided, a prompte will ask you for one if needed
+
+-----------------------
+## server list
+List recommended repositories to download
+
+-----------------------
+## server setup
+Launch the setup prompt
+That prompt is automaticly run when config is unavialable
+"
+}
+
+server_setup(){
+	if ! [ $1 ]; then
+		echo -en "Please enter the github link\n : "
+		read git_uname
+	else
+		git_uname=$1
+	fi
+	echo -n "$git_uname" > $conf_file
+}
+
+repo_setup(){
+	echo coucou
+}
+
+read_conf() {
+	if [ -f $conf_file ]; then
+		git_link=$(cat $conf_file | sed "s/\n//g")
+	fi
+}
+
+help_init="Use -i to initialize the repo"
+
+if [[ $1 = "server" ]]; then
+	clean
+	conf_file=$repo".test_config"
+	read_conf
+	if [[ $2 == "setup" ]]; then
+		server_setup $conf_file
+		exit
+	elif [[ $2 == "pull" ]]; then
+		if ! [ -d "$test_repo" ];then
+			echo $help_init
+			exit
+		fi
+		if ! [ -d "$test_repo.git" ]; then
+			if [[ $(find $test_repo) != "$test_repo" ]]; then
+				echo There is already a non empty repository, remove it before pulling another one
+				exit
+			fi
+			rmdir $test_repo
+			if ! [ -f $conf_file ]; then
+				server_setup $3
+				read_conf
+			fi
+			git clone $git_link $test_repo
+		else
+			cd $test_repo; git pull -ff
+		fi
+	elif [[ $2 == "push" ]]; then
+		if ! [ -d $test_repo".git" ]; then
+			echo "No git repository found in $(realpath $test_repo)"
+			echo "Add a git repository and try again"
+			exit
+		fi
+		if [ $3 ]; then
+			commit=$3
+		else
+			echo -en "Enter commit message and press enter\n : "
+			read commit
+		fi
+		cd $test_repo; git add *; git commit -m "$commit"; git push
+	elif [[ $2 == "list" ]]; then
+		cat $(dirname $(realpath $0))"/list.txt"
+		exit
+	else
+		server_help
+		exit
+	fi
+fi
+
 echo -e "\033[1;34m####################################################################
 # This script was written by\033[1;37m hmelica \033[1;34mto test your projetcs :)      #
 # Happy coding !                                                   #
@@ -36,8 +146,6 @@ if [[ $1 = "install" ]]; then
 	exit
 fi
 
-checkMain=1
-help_init="Use -i to initialize the repo"
 help_run="\n
 \n
 >> Write your tests into ./test_gen/ and run with -r\n
@@ -74,15 +182,6 @@ Anything written (for example with echo) will be displayed in a\n
 single line. Use '\\\\n' to line return, as if you really wanted to\n
 print '\\\\n'.
 "
-
-
-if [ $(basename $(realpath .)) = "test_gen" ]; then
-	repo="../"
-else
-	repo="./"
-fi
-
-test_repo=$repo"test_gen/"
 
 pushverif(){
 if [ -f "$(dirname $(realpath $0))/../pushverif/pushverif.sh" ]; then
@@ -184,10 +283,6 @@ do_test() {
 	do_shell_test $1 $(echo $fonction | sed "s/^T_//g")
 }
 
-clean() {
-	find $test_repo \( -name "TEMP_*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
-}
-
 while getopts "aihrcpsu" opt; do
 	case $opt in
 		u)
@@ -218,7 +313,7 @@ while getopts "aihrcpsu" opt; do
 			fi
 			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
 				if ! [ -f $repo.gitignore ] || ! [ $(grep "test_gen/\*\*" $repo.gitignore) ]; then
-					echo "test_gen/**" >> $repo.gitignore
+					echo -e "test_gen/**\n.test_config" >> $repo.gitignore
 				fi
 				echo "Repo already initialized, see -h"
 			else
