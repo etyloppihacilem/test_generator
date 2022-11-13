@@ -43,7 +43,7 @@ help_run="\n
 >> Write your tests into ./test_gen/ and run with -r\n
 \n
 --------------------------------------------------------------------\n
-### TESTFILES :\n
+### TEST FILES :\n
 --------------------------------------------------------------------\n
 Tests files should be named \"TESTER_{realname}.c\"\n\n
 You can create one from a template using the -c [filename] command.\n\n
@@ -59,9 +59,20 @@ Tests functions should have a prototype like this :\n\n
 There may be several test functions in one single test file.\n\n
 Return value :\n
 --------------\n
-The return value is 0 if the test passes succesfully or anything else if not.\n
+The return value is 0 if the test passes succesfully or anything\n
+else if not.\n
 Functions are supposed to be executed in the same order than in the\n
-file, but this is not garanteed.
+file, but this is not garanteed.\n
+--------------------------------------------------------------------\n
+### SHELL TEST FILES :\n
+--------------------------------------------------------------------\n
+Shell tests files should be named \"SHELL_{realname}.sh\"\n\n
+Be careful to have the exec right (chmod +x <file>)\n
+You can create one from a template using the -s [filename] command.\n
+Exec rights will be automaticly granted.\n\n
+Anything written (for example with echo) will be displayed in a\n
+single line. Use '\\\\n' to line return, as if you really wanted to\n
+print '\\\\n'.
 "
 
 
@@ -125,7 +136,9 @@ done
 
 do_shell_test() {
 	if [ -f $test_repo$(get_shell_name $1) ]; then
-		echo -en "\tShell script tests:"
+		len=$(($(echo -n $2 | wc -c)-9))
+		if [[ $len < 0 ]]; then len=0; fi
+		echo -en "\tShell script tests :$(printf "%$len.s" " ") "
 		echo -e $($test_repo$(get_shell_name $1) | tr "\n" " ")
 	fi
 }
@@ -167,7 +180,7 @@ do_test() {
 	else
 		echo "$(exec $test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g"))"
 	fi
-	do_shell_test $1
+	do_shell_test $1 $(echo $fonction | sed "s/^T_//g")
 }
 
 clean() {
@@ -233,6 +246,7 @@ else
 	repo=\"./\"
 fi
 test_repo=\$repo\"test_gen/\"								# defines the test repo (something with test_gen)
+# if your script creates files, place them under \$test_repo, and name them after TEMP_* so they will be automaticly removed
 
 
 # Do stuff here
