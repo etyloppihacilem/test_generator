@@ -96,8 +96,10 @@ if [[ $1 = "server" ]]; then
 				read_conf
 			fi
 			git clone $git_link $test_repo
+			exit
 		else
 			cd $test_repo; git pull -ff
+			exit
 		fi
 	elif [[ $2 == "push" ]]; then
 		if ! [ -d $test_repo".git" ]; then
@@ -112,6 +114,7 @@ if [[ $1 = "server" ]]; then
 			read commit
 		fi
 		cd $test_repo; git add *; git commit -m "$commit"; git push
+		exit
 	elif [[ $2 == "list" ]]; then
 		cat $(dirname $(realpath $0))"/list.txt"
 		exit
@@ -131,7 +134,7 @@ echo -e "\033[1;34m#############################################################
 # Do not hesitate to share this repository, but remember using the #
 # github link to enable auto-updates.                              #
 #                                                                  #
-# Use the flag -h to display help                                  #
+# Use the\033[0;37m -h \033[1;34mflag to display help                                  #
 #                                                                  #
 # TIP: to quickly share the script, use the\033[0;37m -p \033[1;34mflag :)             #
 ####################################################################\033[0m\n"
@@ -299,7 +302,7 @@ while getopts "aihrcpsu" opt; do
 			;;
 		h)
 			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
-				echo -e $help_run
+				echo -e $help_run | less
 			else
 				echo -e $help_init
 			fi
