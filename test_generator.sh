@@ -135,6 +135,7 @@ done
 }
 
 do_shell_test() {
+	find $test_repo -name "TEMP_*" -exec chmod a+rwx {} ";"
 	if [ -f $test_repo$(get_shell_name $1) ]; then
 		len=$(($(echo -n $2 | wc -c)-9))
 		if [[ $len < 0 ]]; then len=0; fi
@@ -159,7 +160,7 @@ do_test() {
 	body=""
 	fonctions="$(ctags -x --fields=nP $repo$1 | sed -e "s/^.*\.c\ *//g" | grep "T_.*" | sed -e "s/(.*)/()/g" -e "s/.*\ //g" -e "s/^\**//g")"
 	for fonction in $fonctions; do
-		body="$body$(echo -e "printf(\"\\\\tTest for %s : %s (%d)\\\\n\", \"$(echo $fonction | sed "s/^T_//g")\", $fonction ? \"$faux\" : \"$vrai\", $fonction);")"
+		body="$body$(echo -e "int\tv_$(echo $fonction | sed -e "s/^T_//g" -e "s/()//g") = $fonction;\nprintf(\"\\\\tTest for %s : %s (%d)\\\\n\", \"$(echo $fonction | sed "s/^T_//g")\", v_$(echo $fonction | sed -e "s/^T_//g" -e "s/()//g") ? \"$faux\" : \"$vrai\", v_$(echo $fonction | sed -e "s/^T_//g" -e "s/()//g"));")"
 	done
 	main="
 	int	main(void)
@@ -178,13 +179,13 @@ do_test() {
 		echo -e "\n\033[1;31mERRORS DURING COMPILATION\033[0m\n"
 		echo -e "$compilation_logs"
 	else
-		echo "$(exec $test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g"))"
+		$test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g")
 	fi
 	do_shell_test $1 $(echo $fonction | sed "s/^T_//g")
 }
 
 clean() {
-	find $test_repo \( -name "TEMP.*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
+	find $test_repo \( -name "TEMP_*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
 }
 
 while getopts "aihrcpsu" opt; do
@@ -259,7 +260,7 @@ else
 fi
 "> $test_repo$(get_shell_name $file)
 						chmod +x $test_repo$(get_shell_name $file)
-						echo -e "Shell template generated for \033[1;33m$(get_file_name $file)\033[0m"
+						echo -e "Shell template generated for \033[1;33m$(get_shell_name $file)\033[0m"
 					fi
 				else
 					echo -e "\033[1;31mWrong input\033[0m :/\t\t\033[1;33m$(get_file_name $file)\033[0m"
