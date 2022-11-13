@@ -316,13 +316,13 @@ while getopts "aihrcpsu" opt; do
 			fi
 			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
 				if ! [ -f $repo.gitignore ] || ! [ $(grep "test_gen/\*\*" $repo.gitignore) ]; then
-					echo -e "test_gen/**\n.test_config" >> $repo.gitignore
+					echo -e "test_gen\ntest_gen/**\n.test_config" >> $repo.gitignore
 				fi
 				echo "Repo already initialized, see -h"
 			else
 				mkdir test_gen
 				if ! [ -f $repo.gitignore ] || ! [ $(cat .gitignore | grep "\./test_gen/\*\*") ]; then
-					echo "./test_gen/**" >> $repo.gitignore
+					echo -e "test_gen\ntest_gen/**\n.test_config" >> $repo.gitignore
 				fi
 				echo "Repo succesfully initialized"
 			fi
@@ -358,7 +358,7 @@ else
 fi
 "> $test_repo$(get_shell_name $file)
 						chmod +x $test_repo$(get_shell_name $file)
-						echo -e "Shell template generated for \033[1;33m$(get_shell_name $file)\033[0m"
+						echo -e "Shell template generated for \033[1;33m$(get_file_name $file)\033[0m"
 					fi
 				else
 					echo -e "\033[1;31mWrong input\033[0m :/\t\t\033[1;33m$(get_file_name $file)\033[0m"
