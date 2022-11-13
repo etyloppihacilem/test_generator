@@ -309,6 +309,7 @@ fi
 				fi
 				echo -e "Processing tests for \033[1;33m$(get_file_name $file)\033[0m"
 				do_test $to_test
+				find $test_repo -name "TEMP_*" -delete
 			done
 			clean
 			;;
