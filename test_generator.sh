@@ -71,16 +71,16 @@ else
 	repo="./"
 fi
 
+test_repo=$repo"test_gen/"
+
 pushverif(){
 if [ -f "$(dirname $(realpath $0))/../pushverif/pushverif.sh" ]; then
 	cd $repo ; ~/pushverif/pushverif.sh -s
 fi
 }
 
-test_repo=$repo"test_gen/"
-
 get_file_name() {
-	echo $(basename $1) | sed "s/TESTER_//g"
+	echo $(basename $1) | sed -e "s/TESTER_//g" -e "s/MAIN_//g" -e "s/SHELL_//g"
 }
 
 get_test_name() {
@@ -89,6 +89,10 @@ get_test_name() {
 
 get_main_name() {
 	echo "MAIN_"$(basename $(get_file_name $1))
+}
+
+get_shell_name() {
+	echo "SHELL_"$(basename $(get_file_name $1) .c).sh
 }
 
 gen_template() {
@@ -117,6 +121,13 @@ int	T_$i(void)
 	return (1);			// the test does not, displays error code
 }" >> $test_repo$new_file_name
 done
+}
+
+do_shell_test() {
+	if [ -f $test_repo$(get_shell_name $1) ]; then
+		echo -en "\tShell script tests:"
+		echo -e $($test_repo$(get_shell_name $1) | tr "\n" " ")
+	fi
 }
 
 do_test() {
@@ -156,13 +167,14 @@ do_test() {
 	else
 		echo "$(exec $test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g"))"
 	fi
+	do_shell_test $1
 }
 
 clean() {
-	find $test_repo \( -name "MAIN*\.c" -o -name "*\.out" \) -delete
+	find $test_repo \( -name "TEMP.*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
 }
 
-while getopts "aihrcpu" opt; do
+while getopts "aihrcpsu" opt; do
 	case $opt in
 		u)
 			upd=$(cd $(dirname $(realpath -P $0)) ; git pull -ff)
@@ -202,6 +214,43 @@ while getopts "aihrcpu" opt; do
 				fi
 				echo "Repo succesfully initialized"
 			fi
+			;;
+		s)
+			for file in $*; do
+				if [ $file = "-s" ]; then
+					continue
+				fi
+				if [ $(echo $file | grep "\.c") ] && [ -f $repo$(get_file_name $file) ]; then
+					if [ -f $test_repo$(get_shell_name $file) ]; then
+						echo -e "File \033[1;33m$test_repo$(get_shell_name $file)\033[0m already exists. Delete first if you want to create a new one"
+					else
+						echo "#!/bin/bash
+vrai=\"\033[1;32m OK \033[0m\"	# OK with some color
+faux=\"\033[1;31m KO \033[0m\"	# KO with different color
+if [ \$(basename \$(realpath .)) = \"test_gen\" ]; then		# defines the work repo
+	repo=\"../\"
+else
+	repo=\"./\"
+fi
+test_repo=\$repo\"test_gen/\"								# defines the test repo (something with test_gen)
+
+
+# Do stuff here
+
+
+if [ 1 ]; then
+	echo -e \$vrai				# the test passes
+else
+	echo -e \$faux				# the test doesnt
+fi
+"> $test_repo$(get_shell_name $file)
+						chmod +x $test_repo$(get_shell_name $file)
+						echo -e "Shell template generated for \033[1;33m$(get_file_name $file)\033[0m"
+					fi
+				else
+					echo -e "\033[1;31mWrong input\033[0m :/\t\t\033[1;33m$(get_file_name $file)\033[0m"
+				fi
+			done
 			;;
 		c)
 			for file in $*; do
