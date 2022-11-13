@@ -78,7 +78,7 @@ if [[ $1 = "server" ]]; then
 	conf_file=$repo".test_config"
 	read_conf
 	if [[ $2 == "setup" ]]; then
-		server_setup $conf_file
+		server_setup
 		exit
 	elif [[ $2 == "pull" ]]; then
 		if ! [ -d "$test_repo" ];then
