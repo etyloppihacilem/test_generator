@@ -1,3 +1,10 @@
 # test_generator
 A test generator for C repo
-Run `test_generator.sh -h` to learn more
+
+## install
+Run `test_generator.sh install` to install
+
+## Usage
+`tester <flag>`
+
+Run `tester -h` to learn more
