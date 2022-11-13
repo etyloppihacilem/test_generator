@@ -26,6 +26,16 @@ echo -e "\033[1;34m#############################################################
 # TIP: to quickly share the script, use the\033[0;37m -p \033[1;34mflag :)             #
 ####################################################################\033[0m\n"
 
+if [[ $1 = "install" ]]; then
+	if ! [[ $(grep "alias tester" ~/.zshrc) ]]; then
+		echo "alias tester=\"$(realpath $0)\"" >> ~/.zshrc
+		echo -e "Alias successfully installed.\nReload terminal using 'source ~/.zshrc'\nRun the script with 'tester'"
+	else
+		echo -e "Alias already installed, run with 'tester'"
+	fi
+	exit
+fi
+
 checkMain=1
 help_init="Use -i to initialize the repo"
 help_run="\n
@@ -181,7 +191,7 @@ while getopts "aihrcpu" opt; do
 				echo -e "\033[1;32m OK \033[0m: Script is up to date :)\n"
 			fi
 			if [ -d "./test_gen/" ] || [ -d "../test_gen/" ]; then
-				if ! [ -f $repo.gitignore ] || ! [ $(cat .gitignore | grep "test_gen/\*\*") ]; then
+				if ! [ -f $repo.gitignore ] || ! [ $(grep "test_gen/\*\*" $repo.gitignore) ]; then
 					echo "test_gen/**" >> $repo.gitignore
 				fi
 				echo "Repo already initialized, see -h"
