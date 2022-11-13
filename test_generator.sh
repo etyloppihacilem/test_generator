@@ -47,7 +47,7 @@ List recommended repositories to download
 -----------------------
 ## server setup
 Launch the setup prompt
-That prompt is automaticly run when config is unavialable
+That prompt is automatically run when config is unavialable
 "
 }
 
@@ -345,7 +345,7 @@ else
 	repo=\"./\"
 fi
 test_repo=\$repo\"test_gen/\"								# defines the test repo (something with test_gen)
-# if your script creates files, place them under \$test_repo, and name them after TEMP_* so they will be automaticly removed
+# if your script creates files, place them under \$test_repo, and name them after TEMP_* so they will be automatically removed
 
 
 # Do stuff here
