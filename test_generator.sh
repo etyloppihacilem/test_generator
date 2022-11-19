@@ -242,7 +242,7 @@ do_shell_test() {
 		len=$(($(echo -n $2 | wc -c)-9))
 		if [[ $len < 0 ]]; then len=0; fi
 		echo -en "\tShell script tests :$(printf "%$len.s" " ") "
-		echo -e $($test_repo$(get_shell_name $1) | tr "\n" " ")
+		echo -e $($test_repo$(get_shell_name $1) $test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g") | tr "\n" " ")
 	fi
 }
 
