@@ -346,6 +346,9 @@ else
 fi
 test_repo=\$repo\"test_gen/\"								# defines the test repo (something with test_gen)
 # if your script creates files, place them under \$test_repo, and name them after TEMP_* so they will be automatically removed
+# the \$1 arg is the .out of the main test, you can for example run it with valgrind 
+# uncomment the following line to do so :
+# valgrind -s \$1
 
 
 # Do stuff here
