@@ -404,7 +404,7 @@ fi
 				files=$(find . -name "TESTER_*\.c")
 			fi
 			for file in $files; do
-				if [ $file = "-r" ]; then
+				if [ $file = "-r" ] || [ $file = "-a" ]; then
 					continue
 				fi
 				if [ $(echo $file | grep "TESTER_.*\.c") ] && [ -f $test_repo$(basename $file) ]; then
@@ -429,7 +429,7 @@ fi
 				files=$(find . -name "TESTER_*\.c")
 			fi
 			for file in $files; do
-				if [ $file = "-r" ]; then
+				if [ $file = "-g" ]; then
 					continue
 				fi
 				if [ $(echo $file | grep "TESTER_.*\.c") ] && [ -f $test_repo$(basename $file) ]; then
