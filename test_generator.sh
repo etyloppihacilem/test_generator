@@ -20,7 +20,11 @@ fi
 test_repo=$repo"test_gen/"
 
 clean() {
-	find $test_repo \( -name "TEMP_*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
+	if ! [ $1 ]; then
+		find $test_repo \( -name "TEMP_*" -o -name "MAIN*\.c" -o -name "*\.out" \) -delete
+	else
+		find $test_repo -name "TEMP_*" -delete
+	fi
 }
 
 server_help(){
@@ -276,17 +280,22 @@ do_test() {
 	else
 		additional=""
 	fi
-	compilation_logs=$(gcc -fdiagnostics-color=always -Wall -Werror -Wextra $test_repo$(get_main_name $1) $(get_file_name $1) $additional -o $test_repo$(echo $(get_main_name $1) | sed "s/\.c/.out/g") 2>&1)
+	flags="-g -Wall -Werror -Wextra -Wno-nonnull -Wno-analyzer-null-argument -Wno-analyzer-possible-null-argument"
+	compilation_logs=$(gcc -fdiagnostics-color=always $flags $test_repo$(get_main_name $1) $(get_file_name $1) $additional -o $test_repo$(echo $(get_main_name $1) | sed "s/\.c/.out/g") 2>&1)
 	if [[ $compilation_logs ]]; then
 		echo -e "\n\033[1;31mERRORS DURING COMPILATION\033[0m\n"
 		echo -e "$compilation_logs"
 	else
-		$test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g")
+		if ! [ $2 ]; then
+			$test_repo$(echo $(get_main_name $1) | sed -e "s/\.c/.out/g")
+		fi
 	fi
-	do_shell_test $1 $(echo $fonction | sed "s/^T_//g")
+	if ! [ $2 ]; then
+		do_shell_test $1 $(echo $fonction | sed "s/^T_//g")
+	fi
 }
 
-while getopts "aihrcpsu" opt; do
+while getopts "aihrcpsug" opt; do
 	case $opt in
 		u)
 			upd=$(cd $(dirname $(realpath -P $0)) ; git pull -ff)
@@ -411,6 +420,31 @@ fi
 				echo -e "Processing tests for \033[1;33m$(get_file_name $file)\033[0m"
 				do_test $to_test
 				clean
+			done
+			;;
+		g)
+			if [ $2 ]; then
+				files=$*
+			else
+				files=$(find . -name "TESTER_*\.c")
+			fi
+			for file in $files; do
+				if [ $file = "-r" ]; then
+					continue
+				fi
+				if [ $(echo $file | grep "TESTER_.*\.c") ] && [ -f $test_repo$(basename $file) ]; then
+					to_test=$test_repo$(basename $file)
+				else
+					if [ $(echo $(get_test_name $file) | grep "\.c") ] && [ -f $test_repo$(get_test_name $file) ]; then
+						to_test=$test_repo$(get_test_name $file)
+					else
+						echo -e "\033[1;31mNo testfile found\033[0m :(\t\t\033[1;33m$(get_file_name $file)\033[0m"
+						continue
+					fi
+				fi
+				echo -e "Processing tests for \033[1;33m$(get_file_name $file)\033[0m"
+				do_test $to_test 1
+				clean 1
 			done
 			;;
 	esac
