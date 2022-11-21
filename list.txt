@@ -1,3 +1,3 @@
 A list of recommended test repositories
 
-Libft (partial)			https://github.com/etyloppihacilem/libft_tests.git
+Libft 					https://github.com/etyloppihacilem/libft_tests.git
