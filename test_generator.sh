@@ -280,7 +280,7 @@ do_test() {
 	else
 		additional=""
 	fi
-	flags="-g -Wall -Werror -Wextra -Wno-nonnull -Wno-analyzer-null-argument -Wno-analyzer-possible-null-argument"
+	flags="-g -Wall -Werror -Wextra -Wno-nonnull"
 	compilation_logs=$(gcc -fdiagnostics-color=always $flags $test_repo$(get_main_name $1) $(get_file_name $1) $additional -o $test_repo$(echo $(get_main_name $1) | sed "s/\.c/.out/g") 2>&1)
 	if [[ $compilation_logs ]]; then
 		echo -e "\n\033[1;31mERRORS DURING COMPILATION\033[0m\n"
